@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="DataAccess\Excel\.Private\AddressType.cs" />
+    <Compile Include="DataAccess\Excel\.Private\ExcelDataReader.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="5.7.1" />
+  </ItemGroup>
+
+</Project>
