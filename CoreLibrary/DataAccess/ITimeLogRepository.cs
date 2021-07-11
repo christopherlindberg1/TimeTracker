@@ -9,6 +9,6 @@ namespace CoreLibrary.DataAccess
     /// </summary>
     interface ITimeLogRepository
     {
-        Task<IEnumerable<MonthTimeLogModel>> GetTimeLogDataForMonthAsync(Month month);
+        Task<IEnumerable<TimeLogModel>> GetTimeLogDataForMonthAsync(Month month);
     }
 }
