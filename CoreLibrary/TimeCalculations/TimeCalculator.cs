@@ -1,35 +1,43 @@
-﻿using System;
+﻿using CoreLibrary.Models;
+using System;
+using System.Collections.Generic;
 
-namespace CoreLibrary.TimeCalculation
+namespace CoreLibrary.TimeCalculations
 {
     public class TimeCalculator
     {
-        private readonly TimeSpan WorkingTimePerDay = new TimeSpan(hours: 8, minutes: 0, seconds: 0);
+        private readonly TimeSpan TimeToWorkPerDay = new TimeSpan(hours: 8, minutes: 0, seconds: 0);
 
         public TimeCalculator()
         {
 
         }
 
-        public TimeSpan GetTimeBalanceInMinutesPrivate(
-            DateTime startTime, DateTime finishTime, int lunchInMinutes)
+        public TimeSpan GetTimeBalanceForMonth(IEnumerable<TimeLogModel> timeLogDataForMonth)
         {
-            TimeSpan balance = finishTime.Subtract(startTime);
+            TimeSpan balance = new TimeSpan();
 
-            balance = balance.Subtract(new TimeSpan(hours: 0, minutes: lunchInMinutes, seconds: 0));
+            foreach (var date in timeLogDataForMonth)
+            {
+                if (!date.HasCompleteData)
+                {
+                    continue;
+                }
+
+                TimeSpan timeWorked
+                    = TimeSpan.Parse(date.EndTime.ToString()) - TimeSpan.Parse(date.StartTime.ToString())
+                    - new TimeSpan(hours: 0, minutes: Convert.ToInt32(date.LunchInMinutes), seconds: 0);
+
+                balance += date.IsDayOfWeekend ? timeWorked : timeWorked - TimeToWorkPerDay;
+            }
 
             return balance;
         }
 
-        public TimeSpan GetTimeBalanceInMinutesPrivate(
-            DateTime startTime, DateTime finishTime, int lunchInMinutes, int breaksInMinutes)
+        public TimeSpan TimeDifferencePerUpcomingDayToEvenOutBalanceForMonth(
+            IEnumerable<TimeLogModel> timeLogDataForMonth)
         {
-            TimeSpan balance = finishTime.Subtract(startTime);
-
-            balance = balance.Subtract(new TimeSpan(hours: 0, minutes: lunchInMinutes, seconds: 0));
-            balance = balance.Subtract(new TimeSpan(hours: 0, minutes: breaksInMinutes, seconds: 0));
-
-            return balance;
+            return new TimeSpan();
         }
     }
 }

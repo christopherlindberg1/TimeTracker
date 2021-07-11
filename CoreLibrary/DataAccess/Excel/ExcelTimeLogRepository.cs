@@ -23,10 +23,12 @@ namespace CoreLibrary.DataAccess.Excel
         {
             var keyCellLocations = await _excelDataReader.GetKeyCellLocationsAsync(new FileInfo(FilePaths.TimeLogFilePath), month);
 
-            // Temporary code designed for the month of july
+            int daysOfMonth = Convert.ToInt32(month);
 
             int firstRow = int.Parse(keyCellLocations.DateHeaderExcelAddress[1].ToString()) + 1;
-            int lastRow = int.Parse(keyCellLocations.DateHeaderExcelAddress[1].ToString()) + 31;
+            int lastRow =
+                int.Parse(keyCellLocations.DateHeaderExcelAddress[1].ToString())
+                + DateTime.DaysInMonth(DateTime.Now.Year, daysOfMonth);
 
             string dateCellAddressRange
                 = $"{keyCellLocations.DateHeaderExcelAddress[0]}{firstRow}:"
@@ -64,12 +66,14 @@ namespace CoreLibrary.DataAccess.Excel
                 string endTimeRawData = (i < allEndTimes.Count) ? allEndTimes[i] : null;
                 string lunchBreakTimeRawData = (i < allLunchBreaks.Count) ? allLunchBreaks[i] : null;
 
+                DateTime date = DateTime.Parse(allDates[i]);
+
                 var timeLog = new TimeLogModel
                 {
-                    Date = DateTime.Parse(allDates[i]),
-                    StartTime = string.IsNullOrWhiteSpace(startTimeRawData) ? null : DateTime.Parse(startTimeRawData),
-                    EndTime = string.IsNullOrWhiteSpace(endTimeRawData) ? null : DateTime.Parse(endTimeRawData),
-                    LunchInMinutes = string.IsNullOrWhiteSpace(lunchBreakTimeRawData) ? null : int.Parse(lunchBreakTimeRawData),
+                    Date = date,
+                    StartTime = string.IsNullOrWhiteSpace(startTimeRawData) ? null : TimeSpan.Parse(startTimeRawData),
+                    EndTime = string.IsNullOrWhiteSpace(endTimeRawData) ? null : TimeSpan.Parse(endTimeRawData),
+                    LunchInMinutes = string.IsNullOrWhiteSpace(lunchBreakTimeRawData) ? null : int.Parse(lunchBreakTimeRawData)
                 };
 
                 timeLogDataForMonth.Add(timeLog);
