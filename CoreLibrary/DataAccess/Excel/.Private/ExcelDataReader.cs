@@ -1,8 +1,9 @@
 ﻿using CoreLibrary.DataAccess.Excel.Models;
 using OfficeOpenXml;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CoreLibrary.DataAccess.Excel.Private
@@ -15,7 +16,7 @@ namespace CoreLibrary.DataAccess.Excel.Private
         private const int LastRowForSearch = 10;
         private const int LastColForSearch = 10;
 
-        public async Task<KeyCellLocations> GetKeyCellLocations(FileInfo fileInfo, int sheetIndex)
+        public async Task<KeyCellLocations> GetKeyCellLocationsAsync(FileInfo fileInfo, Month month)
         {
             try
             {
@@ -25,7 +26,10 @@ namespace CoreLibrary.DataAccess.Excel.Private
 
                 await package.LoadAsync(fileInfo);
 
-                var workSheet = package.Workbook.Worksheets[sheetIndex];
+                ExcelWorksheet workSheet =
+                    package.Workbook.Worksheets.FirstOrDefault(w => w.Name == month.ToString())
+                    ?? throw new InvalidOperationException(
+                        $"Could not find a worksheet named { month.ToString() }.");
 
                 for (int currentRow = 1; currentRow < LastRowForSearch; currentRow++)
                 {
@@ -53,6 +57,8 @@ namespace CoreLibrary.DataAccess.Excel.Private
                     }
                 }
 
+                package.Dispose();
+
                 return keyCellLocations;
             }
             catch (Exception)
@@ -61,29 +67,30 @@ namespace CoreLibrary.DataAccess.Excel.Private
             }
         }
 
-        public async Task<string[,]> GetExcelDataAsync(FileInfo fileInfo, int sheetIndex, string address)
+        public async Task<List<string>> GetColumnDataAsync(FileInfo fileInfo, Month month, string address)
         {
-            using var package = new ExcelPackage();
+            try
+            {
+                using var package = new ExcelPackage();
 
-            await package.LoadAsync(fileInfo);
+                await package.LoadAsync(fileInfo);
 
-            var workSheet = package.Workbook.Worksheets[sheetIndex];
+                ExcelWorksheet workSheet =
+                    package.Workbook.Worksheets.FirstOrDefault(w => w.Name == month.ToString())
+                    ?? throw new InvalidOperationException(
+                        $"Could not find a worksheet named { month.ToString() }.");
 
-
-            //for (int currentRow = fromRow; currentRow < toRow; currentRow++)
-            //{
-            //    for (int currentCol = fromCol; currentCol < toCol; currentCol++)
-            //    {
-            //        dataToReturn[currentRow - fromRow, currentCol - fromCol] = workSheet.Cells[currentRow, currentCol].Text;
-            //    }
-            //}
-
-            return null;
+                return workSheet.Cells[address].ToList().ConvertAll(d => d.Text);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         private AddressType GetAddressType(string address)
         {
-            return AddressType.InvalidAddress;
             // FIX WITH REGEX
 
             if (String.IsNullOrWhiteSpace(address)
@@ -93,13 +100,9 @@ namespace CoreLibrary.DataAccess.Excel.Private
             }
 
             if (address.Length > 2)
-                // VALIDATE
                 return AddressType.MultipleCells;
 
-            int placeholder;
-
-            Regex.IsMatch(address, @"[a-zA-Z]\d");
-
+            return AddressType.SingleCell;
         }
 
         /// <summary>

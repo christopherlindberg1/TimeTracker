@@ -1,5 +1,6 @@
 ﻿using CoreLibrary.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CoreLibrary.DataAccess
 {
@@ -8,6 +9,6 @@ namespace CoreLibrary.DataAccess
     /// </summary>
     interface ITimeLogRepository
     {
-        IEnumerable<MonthTimeLogModel> GetTimeLogDataForMonth(Month month);
+        Task<IEnumerable<MonthTimeLogModel>> GetTimeLogDataForMonthAsync(Month month);
     }
 }

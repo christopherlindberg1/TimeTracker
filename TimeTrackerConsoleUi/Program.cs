@@ -1,9 +1,9 @@
 ﻿using CoreLibrary;
 using CoreLibrary.DataAccess.Excel;
 using CoreLibrary.DataAccess.Excel.Private;
-using OfficeOpenXml;
 using System.IO;
 using System.Threading.Tasks;
+using OfficeOpenXml;
 
 namespace TimeTrackerConsoleUi
 {
@@ -13,10 +13,18 @@ namespace TimeTrackerConsoleUi
         {
             ConfigureApplication();
 
-            var excelReader = new ExcelDataReader();
-            var excelTimeLogRepository = new ExcelTimeLogRepository(excelReader);
+            var excelDataReader = new ExcelDataReader();
+            var excelTimeLogRepository = new ExcelTimeLogRepository(excelDataReader);
 
-            var a = await excelReader.GetKeyCellLocations(new FileInfo(FilePaths.TimeLogFilePath), 0);
+            var fileInfo = new FileInfo(FilePaths.TimeLogFilePath);
+
+            var data = await excelTimeLogRepository.GetTimeLogDataForMonthAsync(Month.July);
+
+            //var data = await excelDataReader.GetColumnDataAsync(fileInfo, Month.July, "B3:B33");
+            //var d = await excelTimeLogRepository.GetTimeLogDataForMonthAsync(Month.July);
+
+
+            //var a = await excelReader.GetKeyCellLocations(new FileInfo(FilePaths.TimeLogFilePath), 0);
         }
 
         private static void WriteToConsole()
